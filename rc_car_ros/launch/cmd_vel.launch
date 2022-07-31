@@ -1,0 +1,25 @@
+<launch>
+  <machine name="raspberry" address="192.168.1.232" env-loader="/opt/ros/noetic/remote_env.sh" user="rpilukas"/>
+  <machine name="main" address="192.168.1.233" env-loader="/opt/ros/melodic/env.sh" user="lublass"/>
+  
+  <!-- <node machine="main" name="rviz" pkg="rviz" type="rviz" output="screen" /> -->
+
+  <node machine="raspberry" name="mc_node" pkg="motor_controller"  type="motor_controller_node.py" output="screen"/>
+
+  <arg name="use_standard_msgs" value="false"/>
+  <arg name="device_addr" value="1C:A0:B8:D7:5D:A4"/>
+
+  <node machine="raspberry" pkg="ds4_driver" type="ds4_driver_node.py" name="ds4_driver" output="screen" >
+    <param name="device_addr" value="$(arg device_addr)" />
+    <param name="use_standard_msgs" value="$(arg use_standard_msgs)" />
+    <param name="autorepeat_rate" value="0.0" />
+  </node>
+
+  <arg name="stamped" default="false" />
+  <node machine="raspberry" pkg="ds4_driver" type="ds4_twist_node.py" name="ds4_twist" output="screen" >
+    <rosparam command="load" file="$(find remote_talker)/config/twist_config.yaml" />
+    <param name="stamped" value="$(arg stamped)" />
+  </node>
+
+
+</launch>
